@@ -1,0 +1,29 @@
+#bf{
+    border: 1px solid black;
+    width: 960px;
+    height: 720px;
+    margin:20px auto;
+    position: relative;
+    background-color: gray;
+}
+#mytank{
+    position: absolute;
+    width: 64px;
+    height: 64px;
+    background: url("../assets/Hull_01.png") center no-repeat;
+    background-size: cover;
+}
+.gun{
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+.bullet{
+    position:absolute;
+    width: 64px;
+    height: 64px;
+    background: url("../assets/Exhaust_Fire.png") center no-repeat;
+    background-size: cover;
+}
