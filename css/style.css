@@ -1,10 +1,14 @@
+#wrap{
+    overflow: hidden;
+    margin-top: 20px;
+}
 #bf{
     border: 1px solid black;
     width: 960px;
     height: 720px;
-    margin:20px auto;
     position: relative;
     background-color: gray;
+   float: left;
 }
 #mytank{
     position: absolute;
@@ -26,4 +30,14 @@
     height: 64px;
     background: url("../assets/Exhaust_Fire.png") center no-repeat;
     background-size: cover;
+}
+#info{
+   float: left;
+    width: 200px;
+    overflow: hidden;
+    margin: 0 20px;
+}
+#instruction img{
+    width: 100%;
+    margin-bottom: 30px;
 }
