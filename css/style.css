@@ -14,7 +14,7 @@
     position: absolute;
     width: 64px;
     height: 64px;
-    background: url("../assets/Hull_01.png") center no-repeat;
+    background: url("../assets/Hull_01.png") ;
     background-size: cover;
 }
 .gun{
@@ -24,11 +24,18 @@
     top: 0;
     left: 0;
 }
+.eb{
+    position:absolute;
+    width: 64px;
+    height: 64px;
+    background: url("../assets/Exhaust_Fire.png");
+    background-size: cover;
+}
 .bullet{
     position:absolute;
     width: 64px;
     height: 64px;
-    background: url("../assets/Exhaust_Fire.png") center no-repeat;
+    background: url("../assets/Exhaust_Fire.png");
     background-size: cover;
 }
 #info{
