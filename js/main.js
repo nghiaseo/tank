@@ -6,6 +6,7 @@ var enemy = [];
 var eBullet = []
 var enemyId = 0;
 var score = 0;
+var ebs = 8;
 const enemySpeed = 2;
 const mySpeed = 4;
 class Tank {
@@ -41,7 +42,7 @@ class Tank {
     this.id = id;
     this.speed = enemySpeed;
     this.bullet = {
-      speed:8,
+      speed:ebs,
       x: Number,
       y: Number,
       dir: String,
@@ -164,6 +165,9 @@ hit = function () {
        
       //  enemy.splice(index, 1);
       $('.score').text(++score);
+      if(score%5==0)
+      ebs+=4;
+     
         return true;
       }
 
