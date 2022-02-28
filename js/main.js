@@ -3,7 +3,9 @@ const bulletSize = 64;
 const tankStyle = "Hull_02.png";
 const gunStyle = "Gun_07.png";
 var enemy = [];
+var eBullet = []
 var enemyId = 0;
+var score = 0;
 const enemySpeed = 2;
 const mySpeed = 4;
 class Tank {
@@ -33,6 +35,7 @@ class Tank {
     $("#" + id).append(
       '<img class="gun" src="assets/' + gunStyle + '" alt="gun"></img>'
     );
+    this.destroyed = false;
     this.firing = false;
     this.pos = pos;
     this.id = id;
@@ -48,15 +51,17 @@ class Tank {
 
 //----summon enemy----------------
 function summon() {
+let x = Math.floor(Math.random()*900)
   let pos = {
-    x: 450,
-    y: 330,
+    x: x,
+    y: 0,
     dir: "down",
   };
   let id = "e" + enemyId++;
 
   $("#bf").append("<div id='" + id + "' class='enemy'></div>");
   enemy.push(new Tank(pos, id));
+  
 }
 
 //----------------------------------
@@ -93,6 +98,7 @@ function f(e) {
   if (kc == 32 && e.type == "keydown" && !firing) fire();
 }
 function fire() {
+  
   firing = true;
   $("#bf").append("<div class='bullet'></div>");
   if (tank.dir == "up") {
@@ -152,8 +158,12 @@ hit = function () {
         y < enemy[index].pos.y + tankSize
       ) {
         $("#" + enemy[index].id).remove();
-        clearInterval(enemy[index].patrol);
-        enemy.splice(index, 1);
+        enemy[index].destroyed = true;
+        enemy[index].pos.x = -100;
+        enemy[index].pos.y = -100;
+       
+      //  enemy.splice(index, 1);
+      $('.score').text(++score);
         return true;
       }
 
@@ -213,6 +223,7 @@ detectMove = function () {
   //---------------------------------------------
   if (enemy.length > 0)
     enemy.forEach((element) => {
+      
       let vd = element.pos.y - tank.y;
       let hd = element.pos.x - tank.x;
       if (Math.abs(hd) < Math.abs(vd)) {
@@ -221,14 +232,14 @@ detectMove = function () {
           else {
             if (vd < 0) element.pos.dir = "down";
             else element.pos.dir = "up";
-            if (!element.firing) enemyfire(element);
+            if (!element.firing&&!element.destroyed) enemyfire(element);
           }
         } else {
           if (Math.abs(hd) > tankSize / 2) element.pos.dir = "left";
           else {
             if (vd < 0) element.pos.dir = "down";
             else element.pos.dir = "up";
-            if (!element.firing) enemyfire(element);
+            if (!element.firing&&!element.destroyed) enemyfire(element);
           }
         }
       } else {
@@ -237,25 +248,67 @@ detectMove = function () {
           else {
             if (hd < 0) element.pos.dir = "right";
             else element.pos.dir = "left";
-            if (!element.firing) enemyfire(element);
+            if (!element.firing&&!element.destroyed) enemyfire(element);
           }
         } else {
           if (Math.abs(vd) > tankSize / 2) element.pos.dir = "up";
           else {
             if (hd < 0) element.pos.dir = "right";
             else element.pos.dir = "left";
-            if (!element.firing) enemyfire(element);
+            if (!element.firing&&!element.destroyed) enemyfire(element);
           }
         }
       }
-      
+     
       if (element.firing) moveEnemyBullet(element);
+    //  if(eBullet.length>0)    moveEb()
       findMe(element);
     });
 };
+moveEb = function (){
+    eBullet.forEach((element)=>{
+        let dx,dy
+        switch (element.dir) {
+          case "up":
+            dx = 0
+            dy = -1
+            break;
+          case "down":
+            dx=0
+            dy=1
+            break;
+          case "left":
+            dx = -1
+            dy = 0
+            break;
+          case "right":
+            dx=1
+            dy = 0
+        }
+        if (element.x <= border.R && element.x >= border.L)
+        element.x += dx * element.speed;
+        else {
+          if(enemy[enemy.findIndex(el=>el.id==element.id)])
+         enemy[enemy.findIndex(el=>el.id==element.id)].firing=false;        
+          $("#bullet"+element.id).remove();
+        }
+      
+        if (element.y <= border.B && element.y >= border.T)
+        element.y += dy * element.speed;
+        else {
+          if(enemy[enemy.findIndex(el=>el.id==element.id)])
+          enemy[enemy.findIndex(el=>el.id==element.id)].firing=false;
+          $("#bullet"+element.id).remove();
+        }
+       
+        $("#bullet"+element.id).css("left", element.x + "px");
+        $("#bullet"+element.id).css("top", element.y + "px");
+
+    })
+    
+}
 //-----------------------------------
 moveEnemyBullet = function (e) {
-  console.log('move')
   let dx,dy
   switch (e.bullet.dir) {
     case "up":
@@ -274,66 +327,116 @@ moveEnemyBullet = function (e) {
       dx=1
       dy = 0
   }
-  if (e.bullet.x <= border.R && e.bullet.x >= border.L)
+  if (e.bullet.x <= border.R && e.bullet.x >= border.L&&!hitmytank(e))
   e.bullet.x += dx * e.bullet.speed;
   else {
     e.firing = false;
     $("#bullet"+e.id).remove();
+    eBullet.splice(eBullet.findIndex(ev=>ev.id==e.id),1)
   }
 
-  if (e.bullet.y <= border.B && e.bullet.y >= border.T)
+  if (e.bullet.y <= border.B && e.bullet.y >= border.T&&!hitmytank(e))
   e.bullet.y += dy * e.bullet.speed;
   else {
     e.firing = false;
     $("#bullet"+e.id).remove();
+    eBullet.splice(eBullet.findIndex(ev=>ev.id==e.id),1)
   }
-  // if (hit()) {
-  //   firing = false;
-  //   $(".bullet").remove();
-  // }
+ 
   $("#bullet"+e.id).css("left", e.bullet.x + "px");
   $("#bullet"+e.id).css("top", e.bullet.y + "px");
 };
+//=-----------------------------
+function hitmytank(e){
+  x = e.bullet.x + bulletSize / 2;
+  y = e.bullet.y + bulletSize / 2;
+  
+      if (
+        x > tank.x &&
+        x < tank.x + tankSize &&
+        y > tank.y &&
+        y < tank.y + tankSize
+      ) {
+    //   $('#mytank').remove();
+       $('#gameover').css('display','block');
+        return true;
+      }
 
+  return false;
+
+}
+function restart(){
+  $('#gameover').css('display','none');
+  tank.element.style.left = '450px';
+  tank.element.style.top = '600px';
+  tank.x = 450;
+  tank.y = 600;
+  score = 0;
+  $('.score').text('0');
+  
+    $('.enemy').remove();
+    $('.eb').remove();
+    enemy = [];
+    eBullet = [];
+  
+  //moveTank(0,0);
+}
 //------------------------------------
 function enemyfire(e) {
+  
+  var eb = {id:e.id, dir:String,x:Number,y:Number,speed:8};
   e.firing = true;
   $("#bf").append("<div class='eb' id='bullet" + e.id + "'></div>");
   if (e.pos.dir == "up") {
     $("#bullet" + e.id).css("transform", "rotate(0deg)");
     e.bullet.dir = "up";
+    eb.dir = 'up'
     e.bullet.x = e.pos.x;
+    eb.x = e.pos.x
     e.bullet.y = e.pos.y - gunSize;
-    $("#bullet" + e.id).css("left", e.bullet.x + "px");
-    $("#bullet" + e.id).css("top", e.bullet.y + "px");
+    eb.y = e.pos.y-gunSize
+    $("#bullet" + e.id).css("left", eb.x + "px");
+    $("#bullet" + e.id).css("top", eb.y + "px");
   }
   if (e.pos.dir == "down") {
     $("#bullet" + e.id).css("transform", "rotate(-180deg)");
     e.bullet.dir = "down";
+    eb.dir = 'down'
     e.bullet.x = e.pos.x;
+    eb.x = e.pos.x
     e.bullet.y = e.pos.y + gunSize;
-    $("#bullet" + e.id).css("left", e.bullet.x + "px");
-    $("#bullet" + e.id).css("top", e.bullet.y + "px");
+    eb.y = e.pos.y + gunSize
+    $("#bullet" + e.id).css("left", eb.x + "px");
+    $("#bullet" + e.id).css("top", eb.y + "px");
   }
   if (e.pos.dir == "left") {
     $("#bullet" + e.id).css("transform", "rotate(-90deg)");
     e.bullet.dir = "left";
+    eb.dir='left'
     e.bullet.x = e.pos.x - gunSize;
+    eb.x = e.pos.x - gunSize
     e.bullet.y = e.pos.y;
-    $("#bullet" + e.id).css("left", e.bullet.x + "px");
-    $("#bullet" + e.id).css("top", e.bullet.y + "px");
+    eb.y = e.pos.y
+    $("#bullet" + e.id).css("left", eb.x + "px");
+    $("#bullet" + e.id).css("top", eb.y + "px");
   }
   if (e.pos.dir == "right") {
     $("#bullet" + e.id).css("transform", "rotate(90deg)");
     e.bullet.dir = "right";
+    eb.dir = 'right'
     e.bullet.x = e.pos.x + gunSize;
+    eb.x = e.pos.x +gunSize
     e.bullet.y = e.pos.y;
-    $("#bullet" + e.id).css("left", e.bullet.x + "px");
-    $("#bullet" + e.id).css("top", e.bullet.y + "px");
+    eb.y = e.pos.y
+    $("#bullet" + e.id).css("left", eb.x + "px");
+    $("#bullet" + e.id).css("top", eb.y + "px");
   }
+  eBullet.push(eb)
+  
 }
 //---------------------------------------
 function findMe(e) {
+  if(!e.destroyed)
   switch (e.pos.dir) {
     case "up":
       $("#" + e.id).css("transform", "rotate(0deg)");
@@ -362,6 +465,7 @@ moveEnemy = function (e, dx, dy) {
   $("#" + e.id).css({ left: e.pos.x + "px", top: e.pos.y + "px" });
 };
 moveTank(0, 0);
+setInterval(summon,3000)
 setInterval(function () {
   detectMove();
 }, 1000 / 24);

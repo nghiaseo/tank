@@ -3,6 +3,7 @@
     margin-top: 20px;
 }
 #bf{
+    position: relative;
     border: 1px solid black;
     width: 960px;
     height: 720px;
@@ -47,4 +48,22 @@
 #instruction img{
     width: 100%;
     margin-bottom: 30px;
+}
+#gameover{
+    display: none;
+    position: absolute;
+    color: red;
+    font-weight: 700;
+    font-size: 64px;
+    top:0;
+    left:0;
+    right: 0;
+    bottom: 0;
+    border: 1px solid red;
+    background-color: white;
+    text-align: center;
+   z-index: 1;
+}
+.gotext{
+    margin-top: 40%;
 }
